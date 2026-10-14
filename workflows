@@ -1,0 +1,20 @@
+name: Build SawaHub APK
+
+on:
+workflow_dispatch:
+push:
+paths:
+- 'index.html'
+- '.github/workflows/build-apk.yml'
+
+jobs:
+build:
+runs-on: ubuntu-latest
+steps:
+- name: Get website code
+uses: actions/checkout@v4
+
+  - name: Build Android APK
+    uses: kud/zipalign-apk@v1
+    with:
+      apk_path: app.apk
