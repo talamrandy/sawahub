@@ -1,0 +1,1234 @@
+HTML
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sawahub - Buy, Sell, Connect</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
+body{background:#f4f7fb;color:#222}
+header{background:#087cff;color:white;text-align:center;padding:18px}
+.logo{width:55px;height:55px;margin:auto auto 8px;border:3px solid white;border-radius:50%;display:grid;place-items:center;font-size:27px;font-weight:bold}
+header h1{font-size:30px}
+nav{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;background:white;padding:12px;position:sticky;top:0;z-index:5;box-shadow:0 2px 8px #ddd}
+nav button{border:0;background:#eaf3ff;color:#087cff;padding:10px;border-radius:8px;font-weight:bold}
+.page{display:none;padding:15px;max-width:850px;margin:auto}
+.page.active{display:block}
+.card{background:white;padding:18px;margin:14px 0;border-radius:14px;box-shadow:0 2px 9px #ddd}
+input,textarea,select{width:100%;padding:12px;margin:8px 0;border:1px solid #ccd3dd;border-radius:8px}
+button.main{background:#087cff;color:white;border:0;padding:12px 16px;border-radius:8px;cursor:pointer;margin:5px 0}
+button.secondary{background:#eaf3ff;color:#075bb5;border:0;padding:12px;border-radius:8px;margin:5px 0}
+.product-img{width:100%;max-height:260px;object-fit:contain;background:#f4f7fb;border-radius:10px;margin:10px 0}
+.chat{height:260px;overflow:auto;border:1px solid #ddd;padding:10px;border-radius:10px}
+.message{background:#e7f1ff;padding:10px;margin:8px 0;border-radius:9px;overflow-wrap:anywhere}
+.hidden{display:none!important}
+.muted{color:#666;font-size:14px}
+.status{margin-top:12px;overflow-wrap:anywhere}
+footer{text-align:center;color:#777;padding:25px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">S</div>
+  <h1>Sawahub</h1>
+  <p>Buy • Sell • Connect</p>
+</header>
+
+<nav>
+  <button onclick="showPage('home')">🏠 Home</button>
+  <button onclick="showPage('post')">➕ Post</button>
+  <button onclick="showPage('chat')">💬 Chat</button>
+  <button onclick="showPage('account')">👤 Account</button>
+  <button onclick="showPage('payment')">💳 Pay</button>
+  <button onclick="showPage('settings')">⚙️ Settings</button>
+</nav>
+
+<section id="home" class="page active">
+  <div class="card">
+    <h2>Welcome to Sawahub!</h2>
+    <p>Find items near you or post something you want to sell.</p>
+    <button class="main" onclick="showPage('post')">Post an item</button>
+    <button class="secondary" onclick="showPage('payment')">Access options</button>
+  </div>
+  <div class="card">
+    <input id="search" placeholder="Search products..." oninput="displayItems()">
+    <div id="items"></div>
+  </div>
+</section>
+
+<section id="post" class="page">
+  <div class="card">
+    <h2>Post an Item</h2>
+    <input id="itemName" placeholder="Item name">
+    <input id="price" type="number" min="0" placeholder="Price in KSh">
+    <input id="whatsapp" placeholder="WhatsApp number">
+    <input id="location" placeholder="Your location">
+    <textarea id="description" placeholder="Describe your item"></textarea>
+
+    <label for="image">Choose a photo from your phone gallery</label>
+    <input id="image" type="file" accept="image/*" onchange="previewImage()">
+
+    <label for="imageUrl">Or paste a direct image URL</label>
+    <input id="imageUrl" type="url" placeholder="Paste image URL" oninput="previewImage()">
+    <p class="muted">Pinterest page links may not work as image URLs. Use an image you own or have permission to use.</p>
+
+    <div id="imagePreview"></div>
+    <button class="main" onclick="postItem()">Publish Item</button>
+    <p id="postStatus" class="status"></p>
+  </div>
+</section>
+
+<section id="chat" class="page">
+  <div class="card">
+    <h2>Public Chat 💬</h2>
+    <p class="muted">Demo chat: messages are stored only on this device.</p>
+    <div id="messages" class="chat"></div>
+    <input id="chatName" placeholder="Your name">
+    <textarea id="chatMessage" placeholder="Write a message"></textarea>
+    <button class="main" onclick="sendMessage()">Send Message</button>
+  </div>
+</section>
+
+<section id="account" class="page">
+  <div class="card">
+    <h2>Create an Account</h2>
+    <p class="muted">Demo only. Do not use a real password here.</p>
+    <input id="accountName" placeholder="Your name">
+    <input id="accountEmail" type="email" placeholder="Email">
+    <input id="accountPassword" type="password" placeholder="Create a demo password">
+    <button class="main" onclick="createAccount()">Create Account</button>
+    <p id="accountResult" class="status"></p>
+  </div>
+  <div class="card">
+    <h2>Login</h2>
+    <input id="loginEmail" type="email" placeholder="Email">
+    <input id="loginPassword" type="password" placeholder="Password">
+    <button class="main" onclick="login()">Login</button>
+    <p id="loginResult" class="status"></p>
+  </div>
+</section>
+
+<section id="payment" class="page">
+  <div class="card">
+    <h2>🔐 Sawahub Access</h2>
+    <p>Access fee</p>
+    <h1>KSh 45</h1>
+    <p>Payment method: M-Pesa</p>
+    <p>Use the official payment instructions supplied by the Sawahub owner. The private payment number is not displayed here.</p>
+    <p class="muted">This demo does not initiate or verify an M-Pesa transaction.</p>
+    <button class="main" onclick="document.getElementById('paidForm').classList.remove('hidden')">I Have Already Paid</button>
+  </div>
+
+  <div id="paidForm" class="card hidden">
+    <h2>Paste M-Pesa Confirmation</h2>
+    <textarea id="mpesaMessage" rows="6" placeholder="Paste your M-Pesa confirmation message here"></textarea>
+    <button class="main" onclick="submitPayment()">Submit for Verification</button>
+    <p id="paymentResult" class="status"></p>
+  </div>
+
+  <div class="card">
+    <h3>Payment privacy</h3>
+    <p class="muted">A pasted SMS can be fake. Never enter your M-Pesa PIN. A secure server and official payment integration must verify the transaction before granting paid access.</p>
+  </div>
+</section>
+
+<section id="settings" class="page">
+  <div class="card">
+    <h2>Settings ⚙️</h2>
+    <input id="username" placeholder="Your name">
+    <input id="userLocation" placeholder="Your location">
+    <button class="main" onclick="saveSettings()">Save Settings</button>
+    <p id="settingsResult" class="status"></p>
+    <hr style="margin:18px 0">
+    <button class="secondary" onclick="clearData()">Clear local demo data</button>
+  </div>
+</section>
+
+<footer>© 2026 Sawahub</footer>
+
+<script>
+const getData = (key, fallback) => {
+  try {
+    const value = localStorage.getItem(key);
+    return value ? JSON.parse(value) : fallback;
+  } catch { return fallback; }
+};
+
+let products = getData("sawahubProducts", []);
+let messages = getData("sawahubMessages", []);
+let selectedImage = "";
+
+function showPage(id) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  if (id === "home") displayItems();
+  if (id === "chat") displayMessages();
+}
+
+function saveProducts() {
+  try {
+    localStorage.setItem("sawahubProducts", JSON.stringify(products));
+  } catch {
+    alert("Storage is full. Try a smaller image.");
+  }
+}
+
+function previewImage() {
+  const file = document.getElementById("image").files[0];
+  const url = document.getElementById("imageUrl").value.trim();
+  const preview = document.getElementById("imagePreview");
+  preview.replaceChildren();
+  selectedImage = "";
+
+  if (file) {
+    if (file.size > 2 * 1024 * 1024) {
+      alert("Please choose an image smaller than 2 MB.");
+      document.getElementById("image").value = "";
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = e => {
+      selectedImage = e.target.result;
+      const img = document.createElement("img");
+      img.src = selectedImage;
+      img.className = "product-img";
+      preview.appendChild(img);
+    };
+    reader.readAsDataURL(file);
+    return;
+  }
+
+  if (url) {
+    try {
+      const parsed = new URL(url);
+      if (!["https:", "http:"].includes(parsed.protocol)) throw new Error();
+    } catch {
+      preview.textContent = "Enter a valid image URL.";
+      return;
+    }
+    selectedImage = url;
+    const img = document.createElement("img");
+    img.src = url;
+    img.className = "product-img";
+    img.alt = "Image preview";
+    img.onerror = () => { preview.textContent = "Image could not load. Try a direct image URL."; };
+    preview.appendChild(img);
+  }
+}
+
+function postItem() {
+  const name = document.getElementById("itemName").value.trim();
+  const price = Number(document.getElementById("price").value);
+  const whatsapp = document.getElementById("whatsapp").value.trim();
+  const location = document.getElementById("location").value.trim();
+  const description = document.getElementById("description").value.trim();
+
+  if (!name || !price || price < 0 || !whatsapp || !location) {
+    alert("Enter the item name, valid price, WhatsApp number and location.");
+    return;
+  }
+
+  const product = {
+    id: Date.now(),
+    name, price, whatsapp, location, description,
+    sold: false,
+    image: selectedImage
+  };
+
+  products.unshift(product);
+  saveProducts();
+  document.getElementById("postStatus").textContent = "Item saved on this device.";
+  ["itemName","price","whatsapp","location","description","imageUrl","image"].forEach(id => {
+    document.getElementById(id).value = "";
+  });
+  selectedImage = "";
+  document.getElementById("imagePreview").replaceChildren();
+  showPage("home");
+}
+
+function displayItems() {
+  const container = document.getElementById("items");
+  container.replaceChildren();
+  const query = (document.getElementById("search")?.value || "").toLowerCase();
+  const filtered = products.filter(p =>
+    [p.name, p.description, p.location].join(" ").toLowerCase().includes(query)
+  );
+
+  if (!filtered.length) {
+    container.textContent = products.length ? "No matching items." : "No items yet. Be the first to post!";
+    return;
+  }
+
+  filtered.forEach(p => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    if (p.image) {
+      const img = document.createElement("img");
+      img.src = p.image;
+      img.alt = p.name;
+      img.className = "product-img";
+      card.appendChild(img);
+    }
+
+    const title = document.createElement("h2");
+    title.textContent = p.name;
+    card.appendChild(title);
+
+    const price = document.createElement("h3");
+    price.textContent = "KSh " + p.price;
+    card.appendChild(price);
+
+    const desc = document.createElement("p");
+    desc.textContent = p.description || "";
+    card.appendChild(desc);
+
+    const loc = document.createElement("p");
+    loc.textContent = "📍 " + p.location;
+    card.appendChild(loc);
+
+    const phone = document.createElement("p");
+    phone.textContent = "WhatsApp: " + p.whatsapp;
+    card.appendChild(phone);
+
+    const wa = document.createElement("a");
+    wa.href = "https://wa.me/" + cleanNumber(p.whatsapp);
+    wa.target = "_blank";
+    wa.rel = "noopener";
+    wa.textContent = "Contact Seller";
+    card.appendChild(wa);
+
+    const status = document.createElement("p");
+    status.textContent = p.sold ? "🔴 SOLD" : "Available";
+    card.appendChild(status);
+
+    if (!p.sold) {
+      const soldBtn = document.createElement("button");
+      soldBtn.className = "secondary";
+      soldBtn.textContent = "Mark as SOLD";
+      soldBtn.onclick = () => {
+        p.sold = true;
+        saveProducts();
+        displayItems();
+      };
+      card.appendChild(soldBtn);
+    }
+    container.appendChild(card);
+  });
+}
+
+function cleanNumber(number) {
+  let n = String(number).replace(/\D/g, "");
+  if (n.startsWith("0")) n = "254" + n.slice(1);
+  return n;
+}
+
+function sendMessage() {
+  const name = document.getElementById("chatName").value.trim();
+  const message = document.getElementById("chatMessage").value.trim();
+  if (!name || !message) return alert("Enter your name and message.");
+
+  messages.push({name, message, time: new Date().toLocaleString()});
+  try {
+    localStorage.setItem("sawahubMessages", JSON.stringify(messages));
+  } catch {}
+  document.getElementById("chatMessage").value = "";
+  displayMessages();
+}
+
+function displayMessages() {
+  const box = document.getElementById("messages");
+  box.replaceChildren();
+  messages.forEach(m => {
+    const item = document.createElement("div");
+    item.className = "message";
+    const name = document.createElement("strong");
+    name.textContent = m.name;
+    const text = document.createElement("p");
+    text.textContent = m.message;
+    const time = document.createElement("small");
+    time.textContent = m.time;
+    item.append(name, text, time);
+    box.appendChild(item);
+  });
+  box.scrollTop = box.scrollHeight;
+}
+
+/* Demo-only account: not secure for real customers.
+   Use a backend authentication service before publishing. */
+function createAccount() {
+  const name = document.getElementById("accountName").value.trim();
+  const email = document.getElementById("accountEmail").value.trim().toLowerCase();
+  const password = document.getElementById("accountPassword").value;
+  if (!name || !email || password.length < 6) {
+    document.getElementById("accountResult").textContent =
+      "Enter your name, valid email and a password of at least 6 characters.";
+    return;
+  }
+  document.getElementById("accountResult").textContent =
+    "Demo account form works, but secure account creation needs a server. Do not use a real password in this demo.";
+}
+
+function login() {
+  document.getElementById("loginResult").textContent =
+    "Secure login is not connected yet. Add a backend authentication service to enable real accounts.";
+}
+
+/* SMS submission does not grant access by itself. */
+function submitPayment() {
+  const msg = document.getElementById("mpesaMessage").value.trim();
+  const result = document.getElementById("paymentResult");
+  if (!msg) {
+    result.textContent = "Paste your M-Pesa confirmation message first.";
+    return;
+  }
+  result.textContent =
+    "Message entered. This demo cannot verify payment. Connect a secure M-Pesa API/server to confirm the transaction before unlocking access.";
+}
+
+function saveSettings() {
+  localStorage.setItem("sawahubName", document.getElementById("username").value);
+  localStorage.setItem("sawahubLocation", document.getElementById("userLocation").value);
+  document.getElementById("settingsResult").textContent = "Settings saved on this device.";
+}
+
+function clearData() {
+  if (!confirm("Clear all Sawahub demo data on this device?")) return;
+  ["sawahubProducts","sawahubMessages","sawahubName","sawahubLocation"].forEach(k => localStorage.removeItem(k));
+  products = [];
+  messages = [];
+  displayItems();
+  displayMessages();
+  document.getElementById("settingsResult").textContent = "Local demo data cleared.";
+}
+
+displayItems();
+displayMessages();
+</script>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sawahub - Buy, Sell, Connect</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
+body{background:#f4f7fb;color:#222}
+header{background:#087cff;color:white;text-align:center;padding:18px}
+.logo{width:55px;height:55px;margin:auto auto 8px;border:3px solid white;border-radius:50%;display:grid;place-items:center;font-size:27px;font-weight:bold}
+header h1{font-size:30px}
+nav{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;background:white;padding:12px;position:sticky;top:0;z-index:5;box-shadow:0 2px 8px #ddd}
+nav button{border:0;background:#eaf3ff;color:#087cff;padding:10px;border-radius:8px;font-weight:bold}
+.page{display:none;padding:15px;max-width:850px;margin:auto}
+.page.active{display:block}
+.card{background:white;padding:18px;margin:14px 0;border-radius:14px;box-shadow:0 2px 9px #ddd}
+input,textarea,select{width:100%;padding:12px;margin:8px 0;border:1px solid #ccd3dd;border-radius:8px}
+button.main{background:#087cff;color:white;border:0;padding:12px 16px;border-radius:8px;cursor:pointer;margin:5px 0}
+button.secondary{background:#eaf3ff;color:#075bb5;border:0;padding:12px;border-radius:8px;margin:5px 0}
+.product-img{width:100%;max-height:260px;object-fit:contain;background:#f4f7fb;border-radius:10px;margin:10px 0}
+.chat{height:260px;overflow:auto;border:1px solid #ddd;padding:10px;border-radius:10px}
+.message{background:#e7f1ff;padding:10px;margin:8px 0;border-radius:9px;overflow-wrap:anywhere}
+.hidden{display:none!important}
+.muted{color:#666;font-size:14px}
+.status{margin-top:12px;overflow-wrap:anywhere}
+footer{text-align:center;color:#777;padding:25px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">S</div>
+  <h1>Sawahub</h1>
+  <p>Buy • Sell • Connect</p>
+</header>
+
+<nav>
+  <button onclick="showPage('home')">🏠 Home</button>
+  <button onclick="showPage('post')">➕ Post</button>
+  <button onclick="showPage('chat')">💬 Chat</button>
+  <button onclick="showPage('account')">👤 Account</button>
+  <button onclick="showPage('payment')">💳 Pay</button>
+  <button onclick="showPage('settings')">⚙️ Settings</button>
+</nav>
+
+<section id="home" class="page active">
+  <div class="card">
+    <h2>Welcome to Sawahub!</h2>
+    <p>Find items near you or post something you want to sell.</p>
+    <button class="main" onclick="showPage('post')">Post an item</button>
+    <button class="secondary" onclick="showPage('payment')">Access options</button>
+  </div>
+  <div class="card">
+    <input id="search" placeholder="Search products..." oninput="displayItems()">
+    <div id="items"></div>
+  </div>
+</section>
+
+<section id="post" class="page">
+  <div class="card">
+    <h2>Post an Item</h2>
+    <input id="itemName" placeholder="Item name">
+    <input id="price" type="number" min="0" placeholder="Price in KSh">
+    <input id="whatsapp" placeholder="WhatsApp number">
+    <input id="location" placeholder="Your location">
+    <textarea id="description" placeholder="Describe your item"></textarea>
+
+    <label for="image">Choose a photo from your phone gallery</label>
+    <input id="image" type="file" accept="image/*" onchange="previewImage()">
+
+    <label for="imageUrl">Or paste a direct image URL</label>
+    <input id="imageUrl" type="url" placeholder="Paste image URL" oninput="previewImage()">
+    <p class="muted">Pinterest page links may not work as image URLs. Use an image you own or have permission to use.</p>
+
+    <div id="imagePreview"></div>
+    <button class="main" onclick="postItem()">Publish Item</button>
+    <p id="postStatus" class="status"></p>
+  </div>
+</section>
+
+<section id="chat" class="page">
+  <div class="card">
+    <h2>Public Chat 💬</h2>
+    <p class="muted">Demo chat: messages are stored only on this device.</p>
+    <div id="messages" class="chat"></div>
+    <input id="chatName" placeholder="Your name">
+    <textarea id="chatMessage" placeholder="Write a message"></textarea>
+    <button class="main" onclick="sendMessage()">Send Message</button>
+  </div>
+</section>
+
+<section id="account" class="page">
+  <div class="card">
+    <h2>Create an Account</h2>
+    <p class="muted">Demo only. Do not use a real password here.</p>
+    <input id="accountName" placeholder="Your name">
+    <input id="accountEmail" type="email" placeholder="Email">
+    <input id="accountPassword" type="password" placeholder="Create a demo password">
+    <button class="main" onclick="createAccount()">Create Account</button>
+    <p id="accountResult" class="status"></p>
+  </div>
+  <div class="card">
+    <h2>Login</h2>
+    <input id="loginEmail" type="email" placeholder="Email">
+    <input id="loginPassword" type="password" placeholder="Password">
+    <button class="main" onclick="login()">Login</button>
+    <p id="loginResult" class="status"></p>
+  </div>
+</section>
+
+<section id="payment" class="page">
+  <div class="card">
+    <h2>🔐 Sawahub Access</h2>
+    <p>Access fee</p>
+    <h1>KSh 45</h1>
+    <p>Payment method: M-Pesa</p>
+    <p>Use the official payment instructions supplied by the Sawahub owner. The private payment number is not displayed here.</p>
+    <p class="muted">This demo does not initiate or verify an M-Pesa transaction.</p>
+    <button class="main" onclick="document.getElementById('paidForm').classList.remove('hidden')">I Have Already Paid</button>
+  </div>
+
+  <div id="paidForm" class="card hidden">
+    <h2>Paste M-Pesa Confirmation</h2>
+    <textarea id="mpesaMessage" rows="6" placeholder="Paste your M-Pesa confirmation message here"></textarea>
+    <button class="main" onclick="submitPayment()">Submit for Verification</button>
+    <p id="paymentResult" class="status"></p>
+  </div>
+
+  <div class="card">
+    <h3>Payment privacy</h3>
+    <p class="muted">A pasted SMS can be fake. Never enter your M-Pesa PIN. A secure server and official payment integration must verify the transaction before granting paid access.</p>
+  </div>
+</section>
+
+<section id="settings" class="page">
+  <div class="card">
+    <h2>Settings ⚙️</h2>
+    <input id="username" placeholder="Your name">
+    <input id="userLocation" placeholder="Your location">
+    <button class="main" onclick="saveSettings()">Save Settings</button>
+    <p id="settingsResult" class="status"></p>
+    <hr style="margin:18px 0">
+    <button class="secondary" onclick="clearData()">Clear local demo data</button>
+  </div>
+</section>
+
+<footer>© 2026 Sawahub</footer>
+
+<script>
+const getData = (key, fallback) => {
+  try {
+    const value = localStorage.getItem(key);
+    return value ? JSON.parse(value) : fallback;
+  } catch { return fallback; }
+};
+
+let products = getData("sawahubProducts", []);
+let messages = getData("sawahubMessages", []);
+let selectedImage = "";
+
+function showPage(id) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  if (id === "home") displayItems();
+  if (id === "chat") displayMessages();
+}
+
+function saveProducts() {
+  try {
+    localStorage.setItem("sawahubProducts", JSON.stringify(products));
+  } catch {
+    alert("Storage is full. Try a smaller image.");
+  }
+}
+
+function previewImage() {
+  const file = document.getElementById("image").files[0];
+  const url = document.getElementById("imageUrl").value.trim();
+  const preview = document.getElementById("imagePreview");
+  preview.replaceChildren();
+  selectedImage = "";
+
+  if (file) {
+    if (file.size > 2 * 1024 * 1024) {
+      alert("Please choose an image smaller than 2 MB.");
+      document.getElementById("image").value = "";
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = e => {
+      selectedImage = e.target.result;
+      const img = document.createElement("img");
+      img.src = selectedImage;
+      img.className = "product-img";
+      preview.appendChild(img);
+    };
+    reader.readAsDataURL(file);
+    return;
+  }
+
+  if (url) {
+    try {
+      const parsed = new URL(url);
+      if (!["https:", "http:"].includes(parsed.protocol)) throw new Error();
+    } catch {
+      preview.textContent = "Enter a valid image URL.";
+      return;
+    }
+    selectedImage = url;
+    const img = document.createElement("img");
+    img.src = url;
+    img.className = "product-img";
+    img.alt = "Image preview";
+    img.onerror = () => { preview.textContent = "Image could not load. Try a direct image URL."; };
+    preview.appendChild(img);
+  }
+}
+
+function postItem() {
+  const name = document.getElementById("itemName").value.trim();
+  const price = Number(document.getElementById("price").value);
+  const whatsapp = document.getElementById("whatsapp").value.trim();
+  const location = document.getElementById("location").value.trim();
+  const description = document.getElementById("description").value.trim();
+
+  if (!name || !price || price < 0 || !whatsapp || !location) {
+    alert("Enter the item name, valid price, WhatsApp number and location.");
+    return;
+  }
+
+  const product = {
+    id: Date.now(),
+    name, price, whatsapp, location, description,
+    sold: false,
+    image: selectedImage
+  };
+
+  products.unshift(product);
+  saveProducts();
+  document.getElementById("postStatus").textContent = "Item saved on this device.";
+  ["itemName","price","whatsapp","location","description","imageUrl","image"].forEach(id => {
+    document.getElementById(id).value = "";
+  });
+  selectedImage = "";
+  document.getElementById("imagePreview").replaceChildren();
+  showPage("home");
+}
+
+function displayItems() {
+  const container = document.getElementById("items");
+  container.replaceChildren();
+  const query = (document.getElementById("search")?.value || "").toLowerCase();
+  const filtered = products.filter(p =>
+    [p.name, p.description, p.location].join(" ").toLowerCase().includes(query)
+  );
+
+  if (!filtered.length) {
+    container.textContent = products.length ? "No matching items." : "No items yet. Be the first to post!";
+    return;
+  }
+
+  filtered.forEach(p => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    if (p.image) {
+      const img = document.createElement("img");
+      img.src = p.image;
+      img.alt = p.name;
+      img.className = "product-img";
+      card.appendChild(img);
+    }
+
+    const title = document.createElement("h2");
+    title.textContent = p.name;
+    card.appendChild(title);
+
+    const price = document.createElement("h3");
+    price.textContent = "KSh " + p.price;
+    card.appendChild(price);
+
+    const desc = document.createElement("p");
+    desc.textContent = p.description || "";
+    card.appendChild(desc);
+
+    const loc = document.createElement("p");
+    loc.textContent = "📍 " + p.location;
+    card.appendChild(loc);
+
+    const phone = document.createElement("p");
+    phone.textContent = "WhatsApp: " + p.whatsapp;
+    card.appendChild(phone);
+
+    const wa = document.createElement("a");
+    wa.href = "https://wa.me/" + cleanNumber(p.whatsapp);
+    wa.target = "_blank";
+    wa.rel = "noopener";
+    wa.textContent = "Contact Seller";
+    card.appendChild(wa);
+
+    const status = document.createElement("p");
+    status.textContent = p.sold ? "🔴 SOLD" : "Available";
+    card.appendChild(status);
+
+    if (!p.sold) {
+      const soldBtn = document.createElement("button");
+      soldBtn.className = "secondary";
+      soldBtn.textContent = "Mark as SOLD";
+      soldBtn.onclick = () => {
+        p.sold = true;
+        saveProducts();
+        displayItems();
+      };
+      card.appendChild(soldBtn);
+    }
+    container.appendChild(card);
+  });
+}
+
+function cleanNumber(number) {
+  let n = String(number).replace(/\D/g, "");
+  if (n.startsWith("0")) n = "254" + n.slice(1);
+  return n;
+}
+
+function sendMessage() {
+  const name = document.getElementById("chatName").value.trim();
+  const message = document.getElementById("chatMessage").value.trim();
+  if (!name || !message) return alert("Enter your name and message.");
+
+  messages.push({name, message, time: new Date().toLocaleString()});
+  try {
+    localStorage.setItem("sawahubMessages", JSON.stringify(messages));
+  } catch {}
+  document.getElementById("chatMessage").value = "";
+  displayMessages();
+}
+
+function displayMessages() {
+  const box = document.getElementById("messages");
+  box.replaceChildren();
+  messages.forEach(m => {
+    const item = document.createElement("div");
+    item.className = "message";
+    const name = document.createElement("strong");
+    name.textContent = m.name;
+    const text = document.createElement("p");
+    text.textContent = m.message;
+    const time = document.createElement("small");
+    time.textContent = m.time;
+    item.append(name, text, time);
+    box.appendChild(item);
+  });
+  box.scrollTop = box.scrollHeight;
+}
+
+/* Demo-only account: not secure for real customers.
+   Use a backend authentication service before publishing. */
+function createAccount() {
+  const name = document.getElementById("accountName").value.trim();
+  const email = document.getElementById("accountEmail").value.trim().toLowerCase();
+  const password = document.getElementById("accountPassword").value;
+  if (!name || !email || password.length < 6) {
+    document.getElementById("accountResult").textContent =
+      "Enter your name, valid email and a password of at least 6 characters.";
+    return;
+  }
+  document.getElementById("accountResult").textContent =
+    "Demo account form works, but secure account creation needs a server. Do not use a real password in this demo.";
+}
+
+function login() {
+  document.getElementById("loginResult").textContent =
+    "Secure login is not connected yet. Add a backend authentication service to enable real accounts.";
+}
+
+/* SMS submission does not grant access by itself. */
+function submitPayment() {
+  const msg = document.getElementById("mpesaMessage").value.trim();
+  const result = document.getElementById("paymentResult");
+  if (!msg) {
+    result.textContent = "Paste your M-Pesa confirmation message first.";
+    return;
+  }
+  result.textContent =
+    "Message entered. This demo cannot verify payment. Connect a secure M-Pesa API/server to confirm the transaction before unlocking access.";
+}
+
+function saveSettings() {
+  localStorage.setItem("sawahubName", document.getElementById("username").value);
+  localStorage.setItem("sawahubLocation", document.getElementById("userLocation").value);
+  document.getElementById("settingsResult").textContent = "Settings saved on this device.";
+}
+
+function clearData() {
+  if (!confirm("Clear all Sawahub demo data on this device?")) return;
+  ["sawahubProducts","sawahubMessages","sawahubName","sawahubLocation"].forEach(k => localStorage.removeItem(k));
+  products = [];
+  messages = [];
+  displayItems();
+  displayMessages();
+  document.getElementById("settingsResult").textContent = "Local demo data cleared.";
+}
+
+displayItems();
+displayMessages();
+</script>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sawahub - Buy, Sell, Connect</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
+body{background:#f4f7fb;color:#222}
+header{background:#087cff;color:white;text-align:center;padding:18px}
+.logo{width:55px;height:55px;margin:auto auto 8px;border:3px solid white;border-radius:50%;display:grid;place-items:center;font-size:27px;font-weight:bold}
+header h1{font-size:30px}
+nav{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;background:white;padding:12px;position:sticky;top:0;z-index:5;box-shadow:0 2px 8px #ddd}
+nav button{border:0;background:#eaf3ff;color:#087cff;padding:10px;border-radius:8px;font-weight:bold}
+.page{display:none;padding:15px;max-width:850px;margin:auto}
+.page.active{display:block}
+.card{background:white;padding:18px;margin:14px 0;border-radius:14px;box-shadow:0 2px 9px #ddd}
+input,textarea,select{width:100%;padding:12px;margin:8px 0;border:1px solid #ccd3dd;border-radius:8px}
+button.main{background:#087cff;color:white;border:0;padding:12px 16px;border-radius:8px;cursor:pointer;margin:5px 0}
+button.secondary{background:#eaf3ff;color:#075bb5;border:0;padding:12px;border-radius:8px;margin:5px 0}
+.product-img{width:100%;max-height:260px;object-fit:contain;background:#f4f7fb;border-radius:10px;margin:10px 0}
+.chat{height:260px;overflow:auto;border:1px solid #ddd;padding:10px;border-radius:10px}
+.message{background:#e7f1ff;padding:10px;margin:8px 0;border-radius:9px;overflow-wrap:anywhere}
+.hidden{display:none!important}
+.muted{color:#666;font-size:14px}
+.status{margin-top:12px;overflow-wrap:anywhere}
+footer{text-align:center;color:#777;padding:25px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">S</div>
+  <h1>Sawahub</h1>
+  <p>Buy • Sell • Connect</p>
+</header>
+
+<nav>
+  <button onclick="showPage('home')">🏠 Home</button>
+  <button onclick="showPage('post')">➕ Post</button>
+  <button onclick="showPage('chat')">💬 Chat</button>
+  <button onclick="showPage('account')">👤 Account</button>
+  <button onclick="showPage('payment')">💳 Pay</button>
+  <button onclick="showPage('settings')">⚙️ Settings</button>
+</nav>
+
+<section id="home" class="page active">
+  <div class="card">
+    <h2>Welcome to Sawahub!</h2>
+    <p>Find items near you or post something you want to sell.</p>
+    <button class="main" onclick="showPage('post')">Post an item</button>
+    <button class="secondary" onclick="showPage('payment')">Access options</button>
+  </div>
+  <div class="card">
+    <input id="search" placeholder="Search products..." oninput="displayItems()">
+    <div id="items"></div>
+  </div>
+</section>
+
+<section id="post" class="page">
+  <div class="card">
+    <h2>Post an Item</h2>
+    <input id="itemName" placeholder="Item name">
+    <input id="price" type="number" min="0" placeholder="Price in KSh">
+    <input id="whatsapp" placeholder="WhatsApp number">
+    <input id="location" placeholder="Your location">
+    <textarea id="description" placeholder="Describe your item"></textarea>
+
+    <label for="image">Choose a photo from your phone gallery</label>
+    <input id="image" type="file" accept="image/*" onchange="previewImage()">
+
+    <label for="imageUrl">Or paste a direct image URL</label>
+    <input id="imageUrl" type="url" placeholder="Paste image URL" oninput="previewImage()">
+    <p class="muted">Pinterest page links may not work as image URLs. Use an image you own or have permission to use.</p>
+
+    <div id="imagePreview"></div>
+    <button class="main" onclick="postItem()">Publish Item</button>
+    <p id="postStatus" class="status"></p>
+  </div>
+</section>
+
+<section id="chat" class="page">
+  <div class="card">
+    <h2>Public Chat 💬</h2>
+    <p class="muted">Demo chat: messages are stored only on this device.</p>
+    <div id="messages" class="chat"></div>
+    <input id="chatName" placeholder="Your name">
+    <textarea id="chatMessage" placeholder="Write a message"></textarea>
+    <button class="main" onclick="sendMessage()">Send Message</button>
+  </div>
+</section>
+
+<section id="account" class="page">
+  <div class="card">
+    <h2>Create an Account</h2>
+    <p class="muted">Demo only. Do not use a real password here.</p>
+    <input id="accountName" placeholder="Your name">
+    <input id="accountEmail" type="email" placeholder="Email">
+    <input id="accountPassword" type="password" placeholder="Create a demo password">
+    <button class="main" onclick="createAccount()">Create Account</button>
+    <p id="accountResult" class="status"></p>
+  </div>
+  <div class="card">
+    <h2>Login</h2>
+    <input id="loginEmail" type="email" placeholder="Email">
+    <input id="loginPassword" type="password" placeholder="Password">
+    <button class="main" onclick="login()">Login</button>
+    <p id="loginResult" class="status"></p>
+  </div>
+</section>
+
+<section id="payment" class="page">
+  <div class="card">
+    <h2>🔐 Sawahub Access</h2>
+    <p>Access fee</p>
+    <h1>KSh 45</h1>
+    <p>Payment method: M-Pesa</p>
+    <p>Use the official payment instructions supplied by the Sawahub owner. The private payment number is not displayed here.</p>
+    <p class="muted">This demo does not initiate or verify an M-Pesa transaction.</p>
+    <button class="main" onclick="document.getElementById('paidForm').classList.remove('hidden')">I Have Already Paid</button>
+  </div>
+
+  <div id="paidForm" class="card hidden">
+    <h2>Paste M-Pesa Confirmation</h2>
+    <textarea id="mpesaMessage" rows="6" placeholder="Paste your M-Pesa confirmation message here"></textarea>
+    <button class="main" onclick="submitPayment()">Submit for Verification</button>
+    <p id="paymentResult" class="status"></p>
+  </div>
+
+  <div class="card">
+    <h3>Payment privacy</h3>
+    <p class="muted">A pasted SMS can be fake. Never enter your M-Pesa PIN. A secure server and official payment integration must verify the transaction before granting paid access.</p>
+  </div>
+</section>
+
+<section id="settings" class="page">
+  <div class="card">
+    <h2>Settings ⚙️</h2>
+    <input id="username" placeholder="Your name">
+    <input id="userLocation" placeholder="Your location">
+    <button class="main" onclick="saveSettings()">Save Settings</button>
+    <p id="settingsResult" class="status"></p>
+    <hr style="margin:18px 0">
+    <button class="secondary" onclick="clearData()">Clear local demo data</button>
+  </div>
+</section>
+
+<footer>© 2026 Sawahub</footer>
+
+<script>
+const getData = (key, fallback) => {
+  try {
+    const value = localStorage.getItem(key);
+    return value ? JSON.parse(value) : fallback;
+  } catch { return fallback; }
+};
+
+let products = getData("sawahubProducts", []);
+let messages = getData("sawahubMessages", []);
+let selectedImage = "";
+
+function showPage(id) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  if (id === "home") displayItems();
+  if (id === "chat") displayMessages();
+}
+
+function saveProducts() {
+  try {
+    localStorage.setItem("sawahubProducts", JSON.stringify(products));
+  } catch {
+    alert("Storage is full. Try a smaller image.");
+  }
+}
+
+function previewImage() {
+  const file = document.getElementById("image").files[0];
+  const url = document.getElementById("imageUrl").value.trim();
+  const preview = document.getElementById("imagePreview");
+  preview.replaceChildren();
+  selectedImage = "";
+
+  if (file) {
+    if (file.size > 2 * 1024 * 1024) {
+      alert("Please choose an image smaller than 2 MB.");
+      document.getElementById("image").value = "";
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = e => {
+      selectedImage = e.target.result;
+      const img = document.createElement("img");
+      img.src = selectedImage;
+      img.className = "product-img";
+      preview.appendChild(img);
+    };
+    reader.readAsDataURL(file);
+    return;
+  }
+
+  if (url) {
+    try {
+      const parsed = new URL(url);
+      if (!["https:", "http:"].includes(parsed.protocol)) throw new Error();
+    } catch {
+      preview.textContent = "Enter a valid image URL.";
+      return;
+    }
+    selectedImage = url;
+    const img = document.createElement("img");
+    img.src = url;
+    img.className = "product-img";
+    img.alt = "Image preview";
+    img.onerror = () => { preview.textContent = "Image could not load. Try a direct image URL."; };
+    preview.appendChild(img);
+  }
+}
+
+function postItem() {
+  const name = document.getElementById("itemName").value.trim();
+  const price = Number(document.getElementById("price").value);
+  const whatsapp = document.getElementById("whatsapp").value.trim();
+  const location = document.getElementById("location").value.trim();
+  const description = document.getElementById("description").value.trim();
+
+  if (!name || !price || price < 0 || !whatsapp || !location) {
+    alert("Enter the item name, valid price, WhatsApp number and location.");
+    return;
+  }
+
+  const product = {
+    id: Date.now(),
+    name, price, whatsapp, location, description,
+    sold: false,
+    image: selectedImage
+  };
+
+  products.unshift(product);
+  saveProducts();
+  document.getElementById("postStatus").textContent = "Item saved on this device.";
+  ["itemName","price","whatsapp","location","description","imageUrl","image"].forEach(id => {
+    document.getElementById(id).value = "";
+  });
+  selectedImage = "";
+  document.getElementById("imagePreview").replaceChildren();
+  showPage("home");
+}
+
+function displayItems() {
+  const container = document.getElementById("items");
+  container.replaceChildren();
+  const query = (document.getElementById("search")?.value || "").toLowerCase();
+  const filtered = products.filter(p =>
+    [p.name, p.description, p.location].join(" ").toLowerCase().includes(query)
+  );
+
+  if (!filtered.length) {
+    container.textContent = products.length ? "No matching items." : "No items yet. Be the first to post!";
+    return;
+  }
+
+  filtered.forEach(p => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    if (p.image) {
+      const img = document.createElement("img");
+      img.src = p.image;
+      img.alt = p.name;
+      img.className = "product-img";
+      card.appendChild(img);
+    }
+
+    const title = document.createElement("h2");
+    title.textContent = p.name;
+    card.appendChild(title);
+
+    const price = document.createElement("h3");
+    price.textContent = "KSh " + p.price;
+    card.appendChild(price);
+
+    const desc = document.createElement("p");
+    desc.textContent = p.description || "";
+    card.appendChild(desc);
+
+    const loc = document.createElement("p");
+    loc.textContent = "📍 " + p.location;
+    card.appendChild(loc);
+
+    const phone = document.createElement("p");
+    phone.textContent = "WhatsApp: " + p.whatsapp;
+    card.appendChild(phone);
+
+    const wa = document.createElement("a");
+    wa.href = "https://wa.me/" + cleanNumber(p.whatsapp);
+    wa.target = "_blank";
+    wa.rel = "noopener";
+    wa.textContent = "Contact Seller";
+    card.appendChild(wa);
+
+    const status = document.createElement("p");
+    status.textContent = p.sold ? "🔴 SOLD" : "Available";
+    card.appendChild(status);
+
+    if (!p.sold) {
+      const soldBtn = document.createElement("button");
+      soldBtn.className = "secondary";
+      soldBtn.textContent = "Mark as SOLD";
+      soldBtn.onclick = () => {
+        p.sold = true;
+        saveProducts();
+        displayItems();
+      };
+      card.appendChild(soldBtn);
+    }
+    container.appendChild(card);
+  });
+}
+
+function cleanNumber(number) {
+  let n = String(number).replace(/\D/g, "");
+  if (n.startsWith("0")) n = "254" + n.slice(1);
+  return n;
+}
+
+function sendMessage() {
+  const name = document.getElementById("chatName").value.trim();
+  const message = document.getElementById("chatMessage").value.trim();
+  if (!name || !message) return alert("Enter your name and message.");
+
+  messages.push({name, message, time: new Date().toLocaleString()});
+  try {
+    localStorage.setItem("sawahubMessages", JSON.stringify(messages));
+  } catch {}
+  document.getElementById("chatMessage").value = "";
+  displayMessages();
+}
+
+function displayMessages() {
+  const box = document.getElementById("messages");
+  box.replaceChildren();
+  messages.forEach(m => {
+    const item = document.createElement("div");
+    item.className = "message";
+    const name = document.createElement("strong");
+    name.textContent = m.name;
+    const text = document.createElement("p");
+    text.textContent = m.message;
+    const time = document.createElement("small");
+    time.textContent = m.time;
+    item.append(name, text, time);
+    box.appendChild(item);
+  });
+  box.scrollTop = box.scrollHeight;
+}
+
+/* Demo-only account: not secure for real customers.
+   Use a backend authentication service before publishing. */
+function createAccount() {
+  const name = document.getElementById("accountName").value.trim();
+  const email = document.getElementById("accountEmail").value.trim().toLowerCase();
+  const password = document.getElementById("accountPassword").value;
+  if (!name || !email || password.length < 6) {
+    document.getElementById("accountResult").textContent =
+      "Enter your name, valid email and a password of at least 6 characters.";
+    return;
+  }
+  document.getElementById("accountResult").textContent =
+    "Demo account form works, but secure account creation needs a server. Do not use a real password in this demo.";
+}
+
+function login() {
+  document.getElementById("loginResult").textContent =
+    "Secure login is not connected yet. Add a backend authentication service to enable real accounts.";
+}
+
+/* SMS submission does not grant access by itself. */
+function submitPayment() {
+  const msg = document.getElementById("mpesaMessage").value.trim();
+  const result = document.getElementById("paymentResult");
+  if (!msg) {
+    result.textContent = "Paste your M-Pesa confirmation message first.";
+    return;
+  }
+  result.textContent =
+    "Message entered. This demo cannot verify payment. Connect a secure M-Pesa API/server to confirm the transaction before unlocking access.";
+}
+
+function saveSettings() {
+  localStorage.setItem("sawahubName", document.getElementById("username").value);
+  localStorage.setItem("sawahubLocation", document.getElementById("userLocation").value);
+  document.getElementById("settingsResult").textContent = "Settings saved on this device.";
+}
+
+function clearData() {
+  if (!confirm("Clear all Sawahub demo data on this device?")) return;
+  ["sawahubProducts","sawahubMessages","sawahubName","sawahubLocation"].forEach(k => localStorage.removeItem(k));
+  products = [];
+  messages = [];
+  displayItems();
+  displayMessages();
+  document.getElementById("settingsResult").textContent = "Local demo data cleared.";
+}
+
+displayItems();
+displayMessages();
+</script>
+</body>
+</html>
